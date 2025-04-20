@@ -54,6 +54,8 @@ def test_login_register(driver):
     assert driver1.current_url.startswith("https://www.booking.com/?auth_success=1"), \
         f"Login failed: unexpected URL {driver1.current_url}"
 
+def test_hello():
+    print("Hello")
 
 
 
