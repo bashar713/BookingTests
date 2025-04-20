@@ -23,7 +23,7 @@ def test_login_register(driver):
     time.sleep(30)
     driver1 = driver["driver1"]
     driver2 = driver["driver2"]
-
+    qoio()
     temp_email = driver2.find_element(By.ID, "mail").get_attribute("value")
     
     driver1.find_element(By.XPATH, "//a[@aria-label='Sign in']").click()
@@ -34,7 +34,7 @@ def test_login_register(driver):
 
     # input("👉 Please solve the CAPTCHA and press Enter to continue...")
     
-    qoio()
+    
 
     time.sleep(15)
 
