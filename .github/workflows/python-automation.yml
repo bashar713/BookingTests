@@ -2,9 +2,9 @@ name: Python Automation CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   run-automation:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run script
-        run: python Test_booking.py
+        run: python -m Test_booking.py -q

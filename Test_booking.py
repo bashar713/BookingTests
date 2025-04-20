@@ -35,7 +35,7 @@ def test_login_register(driver):
     # input("👉 Please solve the CAPTCHA and press Enter to continue...")
     
     qoio()
-    
+
     time.sleep(15)
 
     otp = driver2.find_element(By.XPATH, "//*[@id='tm-body']/main/div[1]/div/div[2]/div[2]/div/div[1]/div/div[4]/ul/li[2]/div[2]/span/a").text[14:20]
