@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run script
-        run: python -m Test_booking.py -q
+        run: python -m Test_booking -q
