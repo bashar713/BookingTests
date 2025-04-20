@@ -1,16 +1,13 @@
 import time
 from selenium import webdriver
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 import pytest
 import re
 
 @pytest.fixture
 def driver():
-
     driver = webdriver.Chrome()
     driver2 = webdriver.Chrome()
     driver.get("https://www.booking.com/")
@@ -20,40 +17,54 @@ def driver():
     driver2.quit()
 
 def test_login_register(driver):
-    time.sleep(30)
     driver1 = driver["driver1"]
     driver2 = driver["driver2"]
-    time.sleep(4)
-    
-    temp_email = driver2.find_element(By.ID, "mail").get_attribute("value")
-    
-    driver1.find_element(By.XPATH, "//a[@aria-label='Sign in']").click()
-    time.sleep(3)
-    driver1.find_element(By.ID, "username").send_keys(temp_email)
-    time.sleep(3)
-    driver1.find_element(By.XPATH, "//button[@type='submit']").click()
+
+    wait1 = WebDriverWait(driver1, 20)
+    wait2 = WebDriverWait(driver2, 20)
+
+    def email_is_ready(driver):
+        email = driver.find_element(By.ID, "mail").get_attribute("value")
+        return email if "@" in email else False
+
+    temp_email = wait2.until(email_is_ready)
+
+
+    sign_in_button = wait1.until(EC.element_to_be_clickable((By.XPATH, "//a[@aria-label='Sign in']")))
+    sign_in_button.click()
+
+    username_field = wait1.until(EC.presence_of_element_located((By.ID, "username")))
+    username_field.send_keys(temp_email)
+
+    submit_button = wait1.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
+    submit_button.click()
 
     # input("👉 Please solve the CAPTCHA and press Enter to continue...")
-        
-    time.sleep(20)
 
-    otp = driver2.find_element(By.XPATH, "//*[@id='tm-body']/main/div[1]/div/div[2]/div[2]/div/div[1]/div/div[4]/ul/li[2]/div[2]/span/a").text[14:20]
+    otp_element = wait2.until(EC.presence_of_element_located((
+        By.XPATH,
+        "//*[@id='tm-body']/main/div[1]/div/div[2]/div[2]/div/div[1]/div/div[4]/ul/li[2]/div[2]/span/a"
+    )))
+    otp = otp_element.text[14:20]
 
-    time.sleep(15)
-    otp_inputs = driver1.find_elements(By.CSS_SELECTOR, "input[name^='code_']")
+    otp_inputs = wait1.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[name^='code_']")))
 
     for i in range(len(otp)):
-        otp_inputs[i].send_keys(otp[i])    
+        otp_inputs[i].send_keys(otp[i])
 
     print(f'Temp email -> {temp_email}')
     print(f'OTP -> {otp}')
 
-    time.sleep(3)
-    driver1.find_element(By.XPATH, "//button[@type='submit']").click()
-    time.sleep(10)
+    otp_submit = wait1.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
+    otp_submit.click()
+
+    wait1.until(EC.url_contains("auth_success=1"))
 
     assert driver1.current_url.startswith("https://www.booking.com/?auth_success=1"), \
         f"Login failed: unexpected URL {driver1.current_url}"
+
+
+
 
 
 
