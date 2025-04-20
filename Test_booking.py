@@ -32,8 +32,8 @@ def test_login_register(driver):
     time.sleep(3)
     driver1.find_element(By.XPATH, "//button[@type='submit']").click()
 
-    input("👉 Please solve the CAPTCHA and press Enter to continue...")
-    
+    # input("👉 Please solve the CAPTCHA and press Enter to continue...")
+    prwo()
     time.sleep(15)
 
     otp = driver2.find_element(By.XPATH, "//*[@id='tm-body']/main/div[1]/div/div[2]/div[2]/div/div[1]/div/div[4]/ul/li[2]/div[2]/span/a").text[14:20]
@@ -54,8 +54,6 @@ def test_login_register(driver):
     assert driver1.current_url.startswith("https://www.booking.com/?auth_success=1"), \
         f"Login failed: unexpected URL {driver1.current_url}"
 
-def test_hello():
-    print("Hello")
 
 
 
