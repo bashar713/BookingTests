@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pytest
 import re
+import random
+import string
 
 @pytest.fixture
 def driver():
@@ -15,6 +17,13 @@ def driver():
     yield {"driver1": driver, "driver2": driver2}
     driver.quit()
     driver2.quit()
+
+@pytest.fixture
+def booking_driver():
+    driver = webdriver.Chrome()
+    driver.get("https://www.booking.com/")
+    yield driver
+    driver.quit()
 
 def test_login_register(driver):
     driver1 = driver["driver1"]
@@ -47,7 +56,10 @@ def test_login_register(driver):
     )))
     otp = otp_element.text[14:20]
 
+    assert otp and len(otp) == 6, f"❌ OTP not received or invalid: '{otp}'"
+
     otp_inputs = wait1.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[name^='code_']")))
+
 
     for i in range(len(otp)):
         otp_inputs[i].send_keys(otp[i])
@@ -64,8 +76,36 @@ def test_login_register(driver):
         f"Login failed: unexpected URL {driver1.current_url}"
 
 
+def test_login_error(booking_driver):
+    wait1 = WebDriverWait(booking_driver, 20)
 
+    sign_in_button = wait1.until(EC.element_to_be_clickable((By.XPATH, "//a[@aria-label='Sign in']")))
+    sign_in_button.click()
 
+    username_field = wait1.until(EC.presence_of_element_located((By.ID, "username")))
+    username_field.send_keys("test@gmail.com")
 
+    submit_button = wait1.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
+    submit_button.click()
 
+    time.sleep(10)
 
+    for _ in range(3):  
+        otp_inputs = wait1.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[name^='code_']")))
+
+        wrong_otp = ''.join(random.choices(string.digits, k=6))
+
+        for i in range(6):
+            otp_inputs[i].clear()
+            otp_inputs[i].send_keys(wrong_otp[i])
+
+        otp_submit = wait1.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
+        otp_submit.click()
+        time.sleep(2)
+
+    try:
+        error_message = wait1.until(EC.presence_of_element_located((By.XPATH, "//span[@class='error-block']")))
+        assert "Too many failed attempts" in error_message.text
+        print("❗ Error message found:", error_message.text)
+    except:
+        print("❌ Error message not found.")
