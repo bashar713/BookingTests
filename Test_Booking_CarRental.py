@@ -1,8 +1,10 @@
+import time
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 
 @pytest.fixture
@@ -54,3 +56,65 @@ def test_car_rental_search_flow(driver):
         "//h1[starts-with(@class,'SM_')]"
     )))
     assert result_header.is_displayed()
+
+def test_car_rental_search_without_pickup_location(driver):
+    wait = WebDriverWait(driver, 15)
+
+    # 1) Go to Booking.com
+    driver.get("https://www.booking.com/?lang=en-gb")
+
+    # 2) Click "Car rentals"
+    wait.until(EC.element_to_be_clickable((By.ID, "cars"))).click()
+
+    # 3) Click "Search" without entering pickup location
+    wait.until(EC.element_to_be_clickable((
+        By.XPATH, "//span[contains(@class,'LPCM_b7bff305')]"
+    ))).click()
+
+    # 4) Wait for ANY error message element to appear
+    error_element = wait.until(EC.visibility_of_element_located((
+        By.XPATH,
+        "//span[contains(@class,'SearchBoxFrameItem_error')]"
+    )))
+
+    # — pause so you can see the error message on screen —
+    time.sleep(5)
+
+    # 5) Assert it’s visible
+    assert error_element.is_displayed()
+
+def test_car_rental_large_input_no_text_matching(driver):
+    wait = WebDriverWait(driver, 20)
+    LARGE_INPUT = "X" * 500
+
+    # 1) Go to Booking.com → Car rentals
+    driver.get("https://www.booking.com/?lang=en-gb")
+    wait.until(EC.element_to_be_clickable((By.ID, "cars"))).click()
+
+    # 2) Type the huge string
+    pickup = wait.until(EC.element_to_be_clickable((
+        By.XPATH,
+        "//input[@name='pickup-location' and contains(@class,'SearchBoxFieldAutocomplete_input')]"
+    )))
+    pickup.clear()
+    pickup.send_keys(LARGE_INPUT)
+
+    # 3) Wait for the dropdown “No Results” container by class only
+    wait.until(EC.visibility_of_element_located((
+        By.XPATH,
+        "//div[@role='listbox']//div[contains(@class,'LPCM_f06d4876')]"
+    )))
+
+    # 4) Click Search
+    wait.until(EC.element_to_be_clickable((
+        By.XPATH, "//span[contains(@class,'LPCM_b7bff305')]"
+    ))).click()
+
+    # 5) Assert the pick‑up‑location error appears
+    error_el = wait.until(EC.visibility_of_element_located((
+        By.XPATH,
+        "//span[contains(@class,'SearchBoxFrameItem_error')]"
+    )))
+    time.sleep(3)  # so you can see it
+    assert error_el.is_displayed()
+
