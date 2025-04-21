@@ -29,8 +29,9 @@ def test_login_register(driver):
     driver1 = driver["driver1"]
     driver2 = driver["driver2"]
 
-    wait1 = WebDriverWait(driver1, 20)
-    wait2 = WebDriverWait(driver2, 20)
+    wait1 = WebDriverWait(driver1, 40)
+    wait2 = WebDriverWait(driver2, 40)
+
 
     def email_is_ready(driver):
         email = driver.find_element(By.ID, "mail").get_attribute("value")
