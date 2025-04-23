@@ -25,6 +25,10 @@ def test_car_rental_search_flow(driver):
     # 2) Click “Car rentals”
     wait.until(EC.element_to_be_clickable((By.ID, "cars"))).click()
 
+    # Check the car rental button
+    wait.until(EC.url_contains("/cars"))
+    assert "/cars" in driver.current_url
+
     # 3) Enter “London” into the pickup-location field
     pickup = wait.until(EC.element_to_be_clickable((
         By.XPATH,
@@ -47,7 +51,7 @@ def test_car_rental_search_flow(driver):
     # 6) Click “Search”
     wait.until(EC.element_to_be_clickable((
         By.XPATH,
-        "//span[contains(@class,'LPCM_b7bff305')]"
+        "//div[contains(@class,'SearchBoxFramePrivate_submit')]//button[@type='submit']"
     ))).click()
 
     # 7) Verify the results header appears (any <h1> whose class starts with "SM_")
@@ -68,7 +72,7 @@ def test_car_rental_search_without_pickup_location(driver):
 
     # 3) Click "Search" without entering pickup location
     wait.until(EC.element_to_be_clickable((
-        By.XPATH, "//span[contains(@class,'LPCM_b7bff305')]"
+        By.XPATH, "//div[contains(@class,'SearchBoxFramePrivate_submit')]//button[@type='submit']"
     ))).click()
 
     # 4) Wait for ANY error message element to appear
@@ -87,7 +91,7 @@ def test_car_rental_large_input_no_text_matching(driver):
     wait = WebDriverWait(driver, 20)
     LARGE_INPUT = "X" * 500
 
-    # 1) Go to Booking.com → Car rentals
+    # 1) Go to Booking.com -> Car rentals
     driver.get("https://www.booking.com/?lang=en-gb")
     wait.until(EC.element_to_be_clickable((By.ID, "cars"))).click()
 
@@ -115,6 +119,6 @@ def test_car_rental_large_input_no_text_matching(driver):
         By.XPATH,
         "//span[contains(@class,'SearchBoxFrameItem_error')]"
     )))
-    time.sleep(3)  # so you can see it
+    time.sleep(3)  
     assert error_el.is_displayed()
 
